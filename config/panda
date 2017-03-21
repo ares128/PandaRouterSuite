@@ -1,0 +1,41 @@
+config global 'global'
+	option long_connection '512'
+	option default_priority '3'
+	option per_user_upload '400'
+	option per_user_download '500'
+	
+config wan 'wan'
+	option interface 'eth0.2'
+	option download '3500'
+	option upload '576'
+
+config wan 'wan2'
+	option download '480'
+	option upload '240'
+
+config classify
+	option priority '1'
+	option proto 'udp'
+	option comment 'game'
+	option src_ip '192.168.254.111'
+
+config classify
+	option priority '2'
+	option proto 'tcp'
+	option comment 'web,wechat'
+	option dest_port '80,443,8080'
+
+config classify
+	option priority '2'
+	option proto 'tcp'
+	option comment 'mail'
+	option dest_port '587,25,110,995,143,993'
+	
+
+config rule 'game'
+	option policy 'wan2'
+	option proto 'udp'
+	option src_ip '192.168.254.111' 
+
+config rule 'default'
+	option policy 'wan'
