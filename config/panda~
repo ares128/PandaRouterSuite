@@ -1,5 +1,6 @@
 config global 'global'
 	option long_connection '512'
+	option default_priority '3'
 	option per_user_upload '400'
 	option per_user_download '500'
 	

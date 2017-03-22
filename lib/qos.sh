@@ -28,7 +28,7 @@ function qos_remove_tc(){
 
 function _qos_create_tc_wan_cake(){
 	local wan=$1
-	local default_priority=$2
+
 	local ifstr=$(uci -p /var/state get network.${wan}.device 2> /dev/null)
 	local brstr=$(uci -p /var/state get network.${wan}.ifname 2> /dev/null)
 	local ifbstr="ifb"$((wan_index+2))
@@ -116,15 +116,12 @@ EOF
 
 
 function qos_create_tc_cake(){
-	local default_priority
 
-        config_load panda
-        config_get default_priority global default_priority "3"
 
 	config_load panda
 
 	wan_index=0
-	config_foreach _qos_create_tc_wan_cake wan ${default_priority}	
+	config_foreach _qos_create_tc_wan_cake wan	
 	
 }
 
