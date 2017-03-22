@@ -5,9 +5,6 @@ Welcome to Panda Router Suite!
 There is everything you need for a small network router.
 Bandwidth usage monitor, Per user bandwidth limit, QOS, Multi Wan balancing.
 
-[TOC]
-
-----------
 Usage
 ------------------
 
@@ -82,22 +79,22 @@ Write a section for each wan in config file.
 >
 > Values will be
 >> for ADSL and ADSL2
-> ipoa-vcmux (8)
-> ipoa-llcsnap (16)
-> bridged-vcmux (24)
-> bridged-llcsnap (32)
-> pppoa-vcmux (10)
-> pppoa-llc (14)
-> pppoe-vcmux (32)
-> pppoe-llcsnap (40)
+>> ipoa-vcmux (8)
+>> ipoa-llcsnap (16)
+>> bridged-vcmux (24)
+>> bridged-llcsnap (32)
+>> pppoa-vcmux (10)
+>> pppoa-llc (14)
+>> pppoe-vcmux (32)
+>> pppoe-llcsnap (40)
 >>
 >> for VDSL 
-> pppoe-ptm (27)
-> bridged-ptm (19)
+>> pppoe-ptm (27)
+>> bridged-ptm (19)
 >>
 >> for ethernet
-> ether-phy (20)
-> ether-all (24)
+>> ether-phy (20)
+>> ether-all (24)
 
 ### Classify ###
 Classify is used for QOS.
