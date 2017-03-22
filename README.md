@@ -75,26 +75,31 @@ Write a section for each wan in config file.
 - The name of the section **wan2** shoud be identical to the name in network config.
 - The *download* and *upload* parameter is in kbit, it will affect how wan is balanced and the QOS limitation. Please set to 90% of your actual bandwidth.
 - The *overhead* parameter is set according to the network type from you to your ISP. Set to 0 is also ok.
-> Refer to [Cake qdisc](https://www.bufferbloat.net/projects/codel/wiki/Cake/#extensive-framing-compensation-for-dsl-atm-pppoe).
 >
-> Values will be
->> for ADSL and ADSL2
->> ipoa-vcmux (8)
->> ipoa-llcsnap (16)
->> bridged-vcmux (24)
->> bridged-llcsnap (32)
->> pppoa-vcmux (10)
->> pppoa-llc (14)
->> pppoe-vcmux (32)
->> pppoe-llcsnap (40)
->>
->> for VDSL 
->> pppoe-ptm (27)
->> bridged-ptm (19)
->>
->> for ethernet
->> ether-phy (20)
->> ether-all (24)
+> Refer to [Cake qdisc](https://www.bufferbloat.net/projects/codel/wiki/Cake/#extensive-framing-compensation-for-dsl-atm-pppoe).
+> 
+> Values could be
+> #### for ADSL and ADSL2
+> 
+> - ipoa-vcmux (8)
+> - ipoa-llcsnap (16)
+> - bridged-vcmux (24) 
+> - bridged-llcsnap (32)
+> - pppoa-vcmux (10)
+> - pppoa-llc (14) 
+> - pppoe-vcmux (32)
+> - pppoe-llcsnap (40)
+>
+> #### for VDSL
+> 
+> - pppoe-ptm (27)
+> - bridged-ptm (19)
+>
+> #### for ethernet
+> 
+> - ether-phy (20)
+> - ether-all (24)
+> 
 
 ### Classify ###
 Classify is used for QOS.
