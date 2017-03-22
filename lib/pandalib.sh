@@ -97,7 +97,6 @@ function panda_checkarp(){
 	config_get mask lan netmask
 
 	cat /proc/net/arp | sed "1 d" | awk '{print $1}' | while read -r ip ; do
-			
 		if  ip_in_net ${ip} ${gw} ${mask} ; then
 			if ! record_has_ip ${ip} ; then
 				record_add_ip ${ip}

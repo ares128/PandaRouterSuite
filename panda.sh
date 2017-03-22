@@ -15,6 +15,11 @@
 # iptables-mod-ipopt
 # tc
 # kmod-sched-connmark
+# kmod-ifb
+# ipset
+
+
+#opkg install ip bash kmod-sched kmod-sched-cake kmod-sched-connmark kmod-sched-core iptables iptables-mod-conntrack-extra iptables-mod-iface iptables-mod-ipopt tc kmod-sched-connmark kmod-ifb ipset
 
 
 function start(){
@@ -33,9 +38,12 @@ function report(){
 	panda_report
 }
 
+function checkarp(){
+	panda_checkarp | sh -x
+}
 
 case "$1" in 
-	start|stop|report)
+	start|stop|report|checkarp)
 		$*
 	;;
 	*)

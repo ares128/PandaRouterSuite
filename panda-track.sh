@@ -15,7 +15,7 @@ function start(){
 	echo "$$" > /var/run/panda-track.pid
 
 	while true; do
-		panda_checkarp | sh
+		./panda.sh checkarp
 		update_bw 
 		sleep 10s
 	done
@@ -24,15 +24,13 @@ function start(){
 
 }
 
-function checkarp(){
-	panda_checkarp | sh -x
-}
+
 
 function checkbw(){
 	update_bw
 }
 case $1 in
-	start|stop|checkarp|checkbw)
+	start|stop|checkbw)
 		$*
 	;;
 	*)
