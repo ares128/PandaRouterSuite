@@ -56,7 +56,7 @@ Configuration File
 --------------------
 This is a guide to write your config file.
 
-###Global section
+###Global section###
 There is only one global section. **PLS** do not forgot the second global
 
 	config global 'global'
@@ -67,7 +67,7 @@ The *long_connection* parameter is that when a connection (if it is not in highe
 
 The *per_user_upload* and *per_user_download* parameter is the bandwidth limit for each user. Value is in kbit. 
 
-###wan section
+###wan section###
 Write a section for each wan in config file.
 
 	config wan 'wan2'
@@ -82,24 +82,24 @@ Write a section for each wan in config file.
 >
 >Values will be
 >> for ADSL and ADSL2
->>ipoa-vcmux (8)
->>ipoa-llcsnap (16)
->>bridged-vcmux (24)
->>bridged-llcsnap (32)
->>pppoa-vcmux (10)
->>pppoa-llc (14)
->>pppoe-vcmux (32)
->>pppoe-llcsnap (40)
+>ipoa-vcmux (8)
+>ipoa-llcsnap (16)
+>bridged-vcmux (24)
+>bridged-llcsnap (32)
+>pppoa-vcmux (10)
+>pppoa-llc (14)
+>pppoe-vcmux (32)
+>pppoe-llcsnap (40)
 >>
->>for VDSL 
->>pppoe-ptm (27)
->>bridged-ptm (19)
+>for VDSL 
+>pppoe-ptm (27)
+>bridged-ptm (19)
 >>
 >> for ethernet
->>ether-phy (20)
->>ether-all (24)
+>ether-phy (20)
+>ether-all (24)
 
-###Classify
+###Classify###
 Classify is used for QOS.
 QOS have 4 different priority. 1-4. 1 is the highest priority and 4 is the lowest.
 Classify config will match in order.
@@ -114,7 +114,7 @@ available option is *proto*, *comment*, *src_ip*, *src_port*, *dest_ip*, *dest_p
 Ip can be *192.168.32.1* or *192.168.254.0/24*
 port can have multi value.
 
-###Rule
+###Rule###
 Rule is used for multi wan balancing.
 Rule config will match in order. 
 
@@ -131,7 +131,7 @@ Special Thanks
 ----------------------------
 This project refers to some other project.
 
-###Multi wan balancing
+###Multi wan balancing###
 
 referred to [Mwan3](https://github.com/Adze1502/mwan), but with much less function.
 
