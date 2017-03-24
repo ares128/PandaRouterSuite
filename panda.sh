@@ -42,8 +42,12 @@ function checkarp(){
 	panda_checkarp | sh -x
 }
 
+function checkbw(){
+	update_bw
+}
+
 case "$1" in 
-	start|stop|report|checkarp)
+	start|stop|report|checkarp|checkbw)
 		$*
 	;;
 	*)

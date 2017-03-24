@@ -16,7 +16,7 @@ function start(){
 
 	while true; do
 		./panda.sh checkarp
-		update_bw 
+		./panda.sh checkbw 
 		sleep 10s
 	done
 
@@ -25,12 +25,8 @@ function start(){
 }
 
 
-
-function checkbw(){
-	update_bw
-}
 case $1 in
-	start|stop|checkbw)
+	start|stop)
 		$*
 	;;
 	*)

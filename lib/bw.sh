@@ -47,19 +47,21 @@ function update_bw(){
 	local ctime=$(current_time)
 	local span=$((ctime-ltime))
 	
-	iptables -w -t mangle -vnxL Panda_bw_input |sed '1,2d' > ${tempi}
-	iptables -w -t mangle -vnxL Panda_bw_output |sed '1,2d' > ${tempo}
-	sed '1d' /var/run/panda > ${templast}
+	if [ $? -eq 0 ]; then
 
-	echo ${ctime} >/var/run/panda 
-	while read -r -u5 ip last_input last_output current ; read -r -u3 pkti bytesi ino; read -r -u4 pkto byteso outo; do
-		local all_input=$((bytesi-byteso))
-		local all_output=$((byteso))
-		local this_input=$((all_input-last_input))
-		local this_output=$((all_output-last_output))
-		echo -e "${ip}\t ${all_input}\t\t ${all_output}\t\t $((this_input*1000/span))\t\t $((this_output*1000/span))"
-	done 5< ${templast} 3<${tempi} 4<${tempo} >>/var/run/panda
+		iptables -w -t mangle -vnxL Panda_bw_input |sed '1,2d' > ${tempi}
+		iptables -w -t mangle -vnxL Panda_bw_output |sed '1,2d' > ${tempo}
+		sed '1d' /var/run/panda > ${templast}
 
+		echo ${ctime} >/var/run/panda 
+		while read -r -u5 ip last_input last_output current ; read -r -u3 pkti bytesi ino; read -r -u4 pkto byteso outo; do
+			local all_input=$((bytesi-byteso))
+			local all_output=$((byteso))
+			local this_input=$((all_input-last_input))
+			local this_output=$((all_output-last_output))
+			echo -e "${ip}\t ${all_input}\t\t ${all_output}\t\t $((this_input*1000/span))\t\t $((this_output*1000/span))"
+		done 5< ${templast} 3<${tempi} 4<${tempo} >>/var/run/panda
+	fi
 
 	rm ${tempi}
 	rm ${tempo}
