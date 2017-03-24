@@ -14,7 +14,7 @@ function record_has_ip(){
 
 
 function current_time(){
-	awk '{print $1*1000}' /proc/uptime
+	awk '{printf "%d",$1*1000}' /proc/uptime
 }
 
 function record_add_ip(){
@@ -48,9 +48,10 @@ function update_bw(){
 	local span=$((ctime-ltime))
 	
 	if [ $? -eq 0 ]; then
-
-		iptables -w -t mangle -vnxL Panda_bw_input |sed '1,2d' > ${tempi}
+		
 		iptables -w -t mangle -vnxL Panda_bw_output |sed '1,2d' > ${tempo}
+		iptables -w -t mangle -vnxL Panda_bw_input |sed '1,2d' > ${tempi}
+		
 		sed '1d' /var/run/panda > ${templast}
 
 		echo ${ctime} >/var/run/panda 
