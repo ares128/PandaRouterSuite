@@ -59,7 +59,8 @@ function update_bw(){
 			local all_output=$((byteso))
 			local this_input=$((all_input-last_input))
 			local this_output=$((all_output-last_output))
-			echo -e "${ip}\t ${all_input}\t\t ${all_output}\t\t $((this_input*1000/span))\t\t $((this_output*1000/span))"
+			printf "%16s %20s %20s %10s %10s\n" ${ip} ${all_input} ${all_output} $((this_input*1000/span)) $((this_output*1000/span))
+			#echo -e "${ip}\t ${all_input}\t\t ${all_output}\t\t $((this_input*1000/span))\t\t $((this_output*1000/span))"
 		done 5< ${templast} 3<${tempi} 4<${tempo} >>/var/run/panda
 	fi
 
@@ -70,7 +71,8 @@ function update_bw(){
 }
 
 function report_bw(){
-	echo -e "IP\t\t Total Inbound\t Total Outbound\t Ingress BW\t Egress BW"
+	printf "%16s %20s %20s %10s %10s\n" "IP" "TotalInbound" "TotalOutbound" "Ingress BW" "Egress BW"
+	#echo -e "IP\t\t Total Inbound\t Total Outbound\t Ingress BW\t Egress BW"
 	sed '1d' /var/run/panda
 }
 
