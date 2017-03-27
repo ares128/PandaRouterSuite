@@ -47,6 +47,7 @@ TODO LIST
  6. Use *rateest* to do a better balancing on multi wan.
  7. Add the concept of group, so that we can apply different bandwidth limit on different set of IPs.
  8. Change per_user_limit to percetage according to all bandwidth available.
+ 9. make a more reasonable hfsc scheam.
 
 ------------------------------------------
 Configuration File
