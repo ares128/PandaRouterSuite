@@ -39,7 +39,7 @@ function report(){
 }
 
 function checkarp(){
-	panda_checkarp | sh -x
+	panda_checkarp | sh 
 }
 
 function checkbw(){

@@ -17,6 +17,8 @@ function current_time(){
 	awk '{printf "%d",$1*1000}' /proc/uptime
 }
 
+
+
 function record_add_ip(){
 	local ip=$1
 	local cindex=0
@@ -203,7 +205,7 @@ tc filter add dev ${ifstr} parent ffff: protocol ip u32 match u32 0 0 action con
 EOF
 }
 
-function bw_create_tc_basic(){
+function bw_create_tc_basic_htb(){
 	config_load panda
 	
 
@@ -228,12 +230,12 @@ function bw_create_tc_basic(){
 
 # ifb0 for upload bw limit
 tc qdisc add dev ifb0 root handle 1: htb default ffff r2q ${r2q_upload}
-tc class add dev ifb0 parent 1: classid 1:ffff htb rate ${utotal}kbit
+tc class add dev ifb0 parent 1: classid 1:ffff htb rate $((utotal*2))kbit
 
 
 # ifb1 for download bw limit
 tc qdisc add dev ifb1 root handle 1: htb default ffff r2q ${r2q_download}
-tc class add dev ifb1 parent 1: classid 1:ffff htb rate ${dtotal}kbit
+tc class add dev ifb1 parent 1: classid 1:ffff htb rate $((dtotal*2))kbit
 
 ip link set dev ifb0 up
 ip link set dev ifb1 up
@@ -243,7 +245,45 @@ EOF
 	config_foreach _bw_create_tc_wan wan
 }
 
-function _bw_create_tc_ip(){
+
+function bw_create_tc_basic_hfsc(){
+	config_load panda
+	
+
+	local umax
+	config_get umax global per_user_upload
+
+	local dmax
+	config_get dmax global per_user_download
+
+	utotal=0
+	dtotal=0
+	
+	config_foreach calc_total_for_wans wan
+
+
+	cat <<EOF
+
+# ifb0 for upload bw limit
+tc qdisc add dev ifb0 root handle 1: hfsc default ffff
+tc class add dev ifb0 parent 1: classid 1:ffff hfsc sc rate $((utotal))kbit ul rate $((utotal*2))kbit
+
+
+# ifb1 for download bw limit
+tc qdisc add dev ifb1 root handle 1: hfsc default ffff
+tc class add dev ifb1 parent 1: classid 1:ffff hfsc sc rate $((dtotal))kbit ul rate $((dtotal*2))kbit
+
+ip link set dev ifb0 up
+ip link set dev ifb1 up
+
+EOF
+	wan_index=0
+	config_foreach _bw_create_tc_wan wan
+}
+
+
+
+function _bw_create_tc_ip_htb(){
 	local index=$1
 	local ip=$2
 	local umin=$3
@@ -253,6 +293,20 @@ function _bw_create_tc_ip(){
 	printf "tc class add dev ifb0 parent 1:ffff classid 1:%x htb rate %dkbit ceil %dkbit prio 1\n" ${index} ${umin} ${umax}
 	printf "tc filter add dev ifb0 protocol ip parent 1: prio 1 handle 0x%x00/0x00ffff00 fw flowid 1:%x\n" ${index} ${index}
 	printf "tc class add dev ifb1 parent 1:ffff classid 1:%x htb rate %dkbit ceil %dkbit prio 1\n" ${index} ${dmin} ${dmax}
+	printf "tc filter add dev ifb1 protocol ip parent 1: prio 1 handle 0x%x00/0x00ffff00 fw flowid 1:%x\n" ${index} ${index} 
+
+}
+
+function _bw_create_tc_ip_hfsc(){
+	local index=$1
+	local ip=$2
+	local umin=$3
+	local dmin=$4
+	local umax=$5
+	local dmax=$6
+	printf "tc class add dev ifb0 parent 1:ffff classid 1:%x hfsc ls rate %dkbit ul rate %dkbit\n" ${index} ${umin} ${umax}
+	printf "tc filter add dev ifb0 protocol ip parent 1: prio 1 handle 0x%x00/0x00ffff00 fw flowid 1:%x\n" ${index} ${index}
+	printf "tc class add dev ifb1 parent 1:ffff classid 1:%x hfsc ls rate %dkbit ul rate %dkbit\n" ${index} ${dmin} ${dmax}
 	printf "tc filter add dev ifb1 protocol ip parent 1: prio 1 handle 0x%x00/0x00ffff00 fw flowid 1:%x\n" ${index} ${index} 
 
 }
@@ -320,7 +374,7 @@ function bw_create_ip(){
 	local dmin=$((dmax/10))
 	
 	_bw_create_ipt_ip ${index} ${ip} ${gw}
-	_bw_create_tc_ip ${index} ${ip} ${umin} ${dmin} ${umax} ${dmax}
+	_bw_create_tc_ip_htb ${index} ${ip} ${umin} ${dmin} ${umax} ${dmax}
 	
 }
 
@@ -328,5 +382,5 @@ function bw_create(){
 	config_load network
 
 	bw_create_ipt_basic
-	bw_create_tc_basic
+	bw_create_tc_basic_htb
 }

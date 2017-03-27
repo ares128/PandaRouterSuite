@@ -27,6 +27,8 @@ function qos_remove_tc(){
 
 
 function _qos_create_tc_wan_cake(){
+
+	#interface br-xxx to do qos
 	local wan=$1
 
 	local ifstr=$(uci -p /var/state get network.${wan}.device 2> /dev/null)
@@ -51,11 +53,11 @@ tc filter add dev ${brstr} parent ffff: protocol ip u32 match u32 0 0 action con
 EOF
 
 	if [ -n "${overhead}" ] ; then
-		echo "tc qdisc add dev ${brstr} root cake bandwidth ${upload}kbit internet diffserv4 srchost overhead ${overhead}"
-		echo "tc qdisc add dev ${ifbstr} root cake bandwidth ${download}kbit internet diffserv4 srchost overhead ${overhead}"
+		echo "tc qdisc add dev ${brstr} root handle 1: cake bandwidth ${upload}kbit internet diffserv4 srchost overhead ${overhead}"
+		echo "tc qdisc add dev ${ifbstr} root handle 1: cake bandwidth ${download}kbit internet diffserv4 srchost overhead ${overhead}"
 	else
-		echo "tc qdisc add dev ${brstr} root cake bandwidth ${upload}kbit internet diffserv4 srchost"
-		echo "tc qdisc add dev ${ifbstr} root cake bandwidth ${download}kbit internet diffserv4 srchost"
+		echo "tc qdisc add dev ${brstr} root handle 1: cake bandwidth ${upload}kbit internet diffserv4 srchost"
+		echo "tc qdisc add dev ${ifbstr} root handle 1: cake bandwidth ${download}kbit internet diffserv4 srchost"
 	fi
 
 
@@ -67,8 +69,72 @@ EOF
 	printf "ip link set dev %s up\n" ${ifbstr}
 }
 
+function _qos_create_tc_wan_hfsc(){
+	local wan=$1
+	local default_priority=$2
+	local ifstr=$(uci -p /var/state get network.${wan}.device 2> /dev/null)
+	local brstr=$(uci -p /var/state get network.${wan}.ifname 2> /dev/null)
+	local ifbstr="ifb"$((wan_index+2))
+	wan_index=$((wan_index + 1 ))
 
-function _qos_create_tc_wan(){
+	local upload
+	config_get upload ${wan} upload
+
+	local download
+	config_get download ${wan} download
+
+	local u1=$((upload/2)) 
+	local u2=$((upload/2))
+	local u3=$((upload/3))
+	local u4=$((upload/6))
+
+	local d1=$((download/2)) 
+	local d2=$((download/2))
+	local d3=$((download/3))
+	local d4=$((download/6))
+
+
+	cat <<EOF
+tc qdisc add dev ${brstr} root handle 1: hfsc default 1${default_priority}
+tc class add dev ${brstr} parent 1: classid 1:1 hfsc sc m1 ${upload}kbit d 10ms m2 ${upload}kbit ul rate ${upload}kbit 
+
+tc class add dev ${brstr} parent 1:1 classid 1:11 hfsc rt m1 ${upload}kbit d 20ms m2 ${u1}kbit 
+tc class add dev ${brstr} parent 1:1 classid 1:12 hfsc ls rate ${u2}kbit ul rate ${upload}kbit 
+tc class add dev ${brstr} parent 1:1 classid 1:13 hfsc ls rate ${u3}kbit ul rate ${upload}kbit 
+tc class add dev ${brstr} parent 1:1 classid 1:14 hfsc ls rate ${u4}kbit ul rate ${upload}kbit 
+
+
+tc filter add dev ${brstr} parent 1: protocol ip prio 5 handle 0x10/0xf0 fw flowid 1:11
+tc filter add dev ${brstr} parent 1: protocol ip prio 4 handle 0x20/0xf0 fw flowid 1:12
+tc filter add dev ${brstr} parent 1: protocol ip prio 3 handle 0x30/0xf0 fw flowid 1:13
+tc filter add dev ${brstr} parent 1: protocol ip prio 2 handle 0x40/0xf0 fw flowid 1:14
+
+
+tc qdisc add dev ${brstr} ingress
+tc filter add dev ${brstr} parent ffff: protocol ip u32 match u32 0 0 action connmark action mirred egress redirect dev ${ifbstr}
+
+tc qdisc add dev ${ifbstr} root handle 1: hfsc default 1${default_priority}
+tc class add dev ${ifbstr} parent 1: classid 1:1 hfsc sc m1 ${download}kbit d 10ms m2 ${download}kbit ul rate ${download}kbit 
+
+tc class add dev ${ifbstr} parent 1:1 classid 1:11 hfsc rt m1 ${download}kbit d 20ms m2 ${d1}kbit 
+tc class add dev ${ifbstr} parent 1:1 classid 1:12 hfsc ls rate ${d2}kbit ul rate ${download}kbit 
+tc class add dev ${ifbstr} parent 1:1 classid 1:13 hfsc ls rate ${d3}kbit ul rate ${download}kbit 
+tc class add dev ${ifbstr} parent 1:1 classid 1:14 hfsc ls rate ${d4}kbit ul rate ${download}kbit 
+
+
+tc filter add dev ${ifbstr} parent 1: protocol ip prio 5 handle 0x10/0xf0 fw flowid 1:11
+tc filter add dev ${ifbstr} parent 1: protocol ip prio 4 handle 0x20/0xf0 fw flowid 1:12
+tc filter add dev ${ifbstr} parent 1: protocol ip prio 3 handle 0x30/0xf0 fw flowid 1:13
+tc filter add dev ${ifbstr} parent 1: protocol ip prio 2 handle 0x40/0xf0 fw flowid 1:14
+
+
+ip link set dev ${ifbstr} up
+EOF
+}
+
+
+
+function _qos_create_tc_wan_htb(){
 	local wan=$1
 	local default_priority=$2
 	local ifstr=$(uci -p /var/state get network.${wan}.device 2> /dev/null)
@@ -92,8 +158,8 @@ EOF
 
 	for i in $(seq 1 4) ; do
 		local rate=$((upload*(5-i)/10))
-		printf "tc class add dev %s parent 1:1 classid 1:1%d htb rate %dkbit ceil %dkbit prio %d\n" ${brstr} ${i} ${rate} ${upload} $((i+1))
-		printf "tc filter add dev %s parent 1: protocol ip prio %d handle 0x%x0/0xf0 fw flowid 1:1%d\n" ${brstr} $((i+1)) ${i} ${i}
+		printf "tc class add dev %s parent 1:1 classid 1:1%d htb rate %dkbit ceil %dkbit prio %d\n" ${brstr} ${i} ${rate} ${upload} $((6-i))
+		printf "tc filter add dev %s parent 1: protocol ip prio %d handle 0x%x0/0xf0 fw flowid 1:1%d\n" ${brstr} $((6-i)) ${i} ${i}
 	done
 
 	
@@ -134,7 +200,7 @@ function qos_create_tc(){
 	config_load panda
 
 	wan_index=0
-	config_foreach _qos_create_tc_wan wan ${default_priority}	
+	config_foreach _qos_create_tc_wan_hfsc wan ${default_priority}	
 	
 }
 
@@ -246,11 +312,11 @@ EOF
 	cat <<EOF
 iptables -A Panda_qos -t mangle -j CONNMARK --save-mark --mask 0xf0
 
-iptables -A Panda_qos -t mangle -p tcp -m tcp --tcp-flags ALL SYN -j MARK --set-mark 0x10/0xf0
-iptables -A Panda_qos -t mangle -p tcp -m tcp --tcp-flags ALL RST -j MARK --set-mark 0x10/0xf0
-iptables -A Panda_qos -t mangle -p tcp -m tcp --tcp-flags ALL FIN -j MARK --set-mark 0x10/0xf0
+iptables -A Panda_qos -t mangle -p tcp -m tcp --tcp-flags ALL SYN -j MARK --set-mark 0x20/0xf0
+iptables -A Panda_qos -t mangle -p tcp -m tcp --tcp-flags ALL RST -j MARK --set-mark 0x20/0xf0
+iptables -A Panda_qos -t mangle -p tcp -m tcp --tcp-flags ALL FIN -j MARK --set-mark 0x20/0xf0
 
-iptables -A Panda_qos_recheck -t mangle -p udp --dport 53 -j MARK --set-mark 0x10/0xf0
+iptables -A Panda_qos_recheck -t mangle -p udp --dport 53 -j MARK --set-mark 0x20/0xf0
 iptables -A Panda_qos_recheck -t mangle -p icmp -j MARK --set-mark 0x10/0xf0
 iptables -A Panda_qos_recheck -t mangle -m connbytes --connbytes ${long_connection}000 --connbytes-dir both --connbytes-mode bytes -m mark ! --mark 0x10/0xf0 -j MARK --set-mark 0x40/0xf0
 EOF
@@ -272,8 +338,8 @@ EOF
 }
 
 function qos_create(){
-	qos_create_ipt_cake
-	qos_create_tc_cake
+	qos_create_ipt
+	qos_create_tc
 }
 
 function qos_remove(){
