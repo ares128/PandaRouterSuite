@@ -1,5 +1,10 @@
 #!/bin/bash
-. lib/pandalib.sh
+
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]] ;  then DIR="$PWD" ; fi
+
+
+. ${DIR}/lib/pandalib.sh
 
 
 # depends on package:
