@@ -338,8 +338,8 @@ EOF
 }
 
 function qos_create(){
-	qos_create_ipt
-	qos_create_tc
+	qos_create_ipt_cake
+	qos_create_tc_cake
 }
 
 function qos_remove(){
