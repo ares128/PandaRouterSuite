@@ -30,11 +30,10 @@ if [[ ! -d "$DIR" ]] ;  then DIR="$PWD" ; fi
 function start(){
 	panda_checkwan
 	panda_start | sh -x
-	./panda-track.sh start &
 }
 
+
 function stop(){
-	./panda-track.sh stop
 	panda_stop | sh -x
 }
 

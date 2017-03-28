@@ -1,0 +1,41 @@
+#!/bin/sh /etc/rc.common
+
+START=50
+STOP=50
+
+USE_PROCD=1
+PROCD_DEBUG=1
+PROG_PATH='/usr/lib/panda/'
+
+PROG_MAIN=${PROG_PATH}'panda.sh'
+PROG_TRACKER=${PROG_PATH}'panda-track.sh'
+
+
+start_service(){
+	${PROG_MAIN} start
+	
+	procd_open_instance 
+	procd_set_param command ${PROG_TRACKER}	start
+	procd_set_param respawn
+	procd_set_param file "/etc/config/panda"
+	procd_set_param stdout 1
+	procd_set_param stderr 1
+	procd_set_param user nobody
+	procd_close_instance
+	
+}
+
+
+stop_service(){
+	${PROG_TRACKER} stop
+	${PROG_MAIN} stop
+}
+
+service_trigger(){
+	procd_add_reload_trigger "panda"
+}
+
+reload_service(){
+	stop
+	start
+}
