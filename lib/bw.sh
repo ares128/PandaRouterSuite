@@ -230,12 +230,12 @@ function bw_create_tc_basic_htb(){
 
 # ifb0 for upload bw limit
 tc qdisc add dev ifb0 root handle 1: htb default ffff r2q ${r2q_upload}
-tc class add dev ifb0 parent 1: classid 1:ffff htb rate $((utotal*2))kbit
+tc class add dev ifb0 parent 1: classid 1:ffff htb rate 10Mbit
 
 
 # ifb1 for download bw limit
 tc qdisc add dev ifb1 root handle 1: htb default ffff r2q ${r2q_download}
-tc class add dev ifb1 parent 1: classid 1:ffff htb rate $((dtotal*2))kbit
+tc class add dev ifb1 parent 1: classid 1:ffff htb rate 10Mbit
 
 ip link set dev ifb0 up
 ip link set dev ifb1 up
