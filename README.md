@@ -5,6 +5,8 @@ Welcome to Panda Router Suite!
 There is everything you need for a small network router.
 Bandwidth usage monitor, Per user bandwidth limit, QOS, Multi Wan balancing.
 
+#Currently tested on LEDE 17.01.0#
+
 Usage
 ------------------
 
@@ -21,8 +23,9 @@ Usage
 - Change wan interface to bridged mode
 - Set a different metric on each Wan interface.
 - Edit your config file. You can find a example in config folder.
-- Change pwd to the folder where the panda.sh placed. And run **./panda.sh start**
+- To install, run **./setup.sh install** in folder where u put the files.
 - To monitor bandwidth per user, run **./panda.sh report**
+- To uninstall, run **./setup.sh uninstall**
 
 -------------
 Limitations
