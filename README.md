@@ -42,7 +42,7 @@ Limitations
 TODO LIST
 -------------
 
- 1. Add procd init.d script
+ 1. ~~Add procd init.d script~~ Done 30/3/2017
  2. Add luci interface
  3. Track wan status by ping dns and disable the failed wan.
  4. Add IPv6 support
