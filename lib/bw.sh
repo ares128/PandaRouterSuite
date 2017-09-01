@@ -197,7 +197,7 @@ function _bw_create_tc_wan(){
 	echo "tc qdisc add dev ${ifstr} root handle 1: fq_codel"
 
 	cat <<EOF
-tc filter add dev ${ifstr} protocol ip u32 match u32 0 0 action connmark action mirred egress redirect dev ifb0
+tc filter add dev ${brstr} parent 1: protocol ip prio 1 u32 match u32 0 0 action connmark action mirred egress redirect dev ifb0
 
 tc qdisc add dev ${ifstr} ingress
 tc filter add dev ${ifstr} parent ffff: protocol ip u32 match u32 0 0 action connmark action mirred egress redirect dev ifb1

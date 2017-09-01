@@ -20,8 +20,8 @@ function start(){
 	echo "$$" > /var/run/panda-track.pid
 
 	while true; do
-		./panda.sh checkarp
-		./panda.sh checkbw 
+		/usr/lib/panda/panda.sh checkarp
+		/usr/lib/panda/panda.sh checkbw 
 		sleep 10s
 	done
 
